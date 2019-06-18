@@ -52,29 +52,32 @@ namespace ILS
 
             while(currentIndex < FileLineTokens.Count-1)
             {
-                Token curToken = FileLineTokens[currentIndex].GetNextToken();
-                TokenType type = curToken.GetType();
-
-                if (curToken.ToString() != "")
+                if (FileLineTokens[currentIndex].HasNext())
                 {
-                    if (type == TokenType.VARIABLE)
-                        try
-                        {
-                            AddNewVariable(curToken.ToString());
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.LogErrorAndQuit(e.Message);
-                        }
-                    else if (type == TokenType.FUNCTION)
-                        try
-                        {
-                            RunFunction(curToken.ToString());
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.LogErrorAndQuit(e.Message);
-                        }
+                    Token curToken = FileLineTokens[currentIndex].GetNextToken();
+                    TokenType type = curToken.GetType();
+
+                    if (curToken.ToString() != "")
+                    {
+                        if (type == TokenType.VARIABLE)
+                            try
+                            {
+                                AddNewVariable(curToken.ToString());
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.LogErrorAndQuit(e.Message);
+                            }
+                        else if (type == TokenType.FUNCTION)
+                            try
+                            {
+                                RunFunction(curToken.ToString());
+                            }
+                            catch (Exception e)
+                            {
+                                Logger.LogErrorAndQuit(e.Message);
+                            }
+                    }
                 }
 
                 currentIndex++;
@@ -149,7 +152,7 @@ namespace ILS
             endlinetoken = FileLineTokens[currentIndex].GetLastToken();
 
             if (setvartoken == null || typetoken == null || valtoken == null || endlinetoken == null)
-                throw new ILSTooFewTokensException("Expected more tokens");
+                throw new ILSTooFewTokensException("Expected more tokens on line " + (currentIndex+1));
 
             if (setvartoken.GetType() == TokenType.SETVAR && typetoken.GetType() == TokenType.VARTYPENUM && valtoken.GetType() == TokenType.VARIABLE)
             {

@@ -21,5 +21,10 @@ namespace ILS
         public ILSTooFewTokensException(string m) : base("Error of type ILSTooFewExceptions thrown: " + m) { }
     }
 
+    class InvalidTokenException : Exceptions
+    {
+        public InvalidTokenException(string m) : base("Error of type ILSTooFewExceptions thrown: " + m) { }
+    }
+
 
 }

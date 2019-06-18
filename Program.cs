@@ -9,7 +9,7 @@ namespace ILS
        
         static void Main(string[] args)
         {
-            File file = new File("C:\\Users\\Gabe Scott\\Desktop\\ILS\\ILS.ils");
+            File file = new File("C:\\Users\\Gabe Scott\\source\\repos\\ILS\\ILS.ils");
             file.ReadInput();
             file.Interpret();
 

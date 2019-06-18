@@ -11,14 +11,20 @@ namespace ILS
         public TokenLine(string Line)
         {
             tokens = new List<Token>();
-            //TODO Make a parser based on characters
-            foreach (string str in Line.Split(" "))
+
+            Parser parser = new Parser(Line);
+            parser.Run();
+
+            foreach (string str in parser.GetTokens())
                 tokens.Add(new Token(str));
         }
 
         public Token GetNextToken()
         {
-            if (currentToken == tokens.Count-1 && tokens.Count > 1)
+            if (tokens.Count == 0)
+                throw new ILSTooFewTokensException("Token Line has no tokens");
+
+            if (currentToken >= tokens.Count-1 && tokens.Count >= 0)
                 return null;
 
             return tokens[currentToken++];

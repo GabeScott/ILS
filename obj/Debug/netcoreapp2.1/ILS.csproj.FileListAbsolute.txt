@@ -13,3 +13,14 @@ C:\Users\Gabe Scott\Desktop\ILS\bin\Debug\netcoreapp2.1\ILS.dll
 C:\Users\Gabe Scott\Desktop\ILS\bin\Debug\netcoreapp2.1\ILS.pdb
 C:\Users\Gabe Scott\Desktop\ILS\obj\Debug\netcoreapp2.1\ILS.dll
 C:\Users\Gabe Scott\Desktop\ILS\obj\Debug\netcoreapp2.1\ILS.pdb
+C:\Users\Gabe Scott\source\repos\ILS\bin\Debug\netcoreapp2.1\ILS.deps.json
+C:\Users\Gabe Scott\source\repos\ILS\bin\Debug\netcoreapp2.1\ILS.runtimeconfig.json
+C:\Users\Gabe Scott\source\repos\ILS\bin\Debug\netcoreapp2.1\ILS.runtimeconfig.dev.json
+C:\Users\Gabe Scott\source\repos\ILS\bin\Debug\netcoreapp2.1\ILS.dll
+C:\Users\Gabe Scott\source\repos\ILS\bin\Debug\netcoreapp2.1\ILS.pdb
+C:\Users\Gabe Scott\source\repos\ILS\obj\Debug\netcoreapp2.1\ILS.csprojAssemblyReference.cache
+C:\Users\Gabe Scott\source\repos\ILS\obj\Debug\netcoreapp2.1\ILS.csproj.CoreCompileInputs.cache
+C:\Users\Gabe Scott\source\repos\ILS\obj\Debug\netcoreapp2.1\ILS.AssemblyInfoInputs.cache
+C:\Users\Gabe Scott\source\repos\ILS\obj\Debug\netcoreapp2.1\ILS.AssemblyInfo.cs
+C:\Users\Gabe Scott\source\repos\ILS\obj\Debug\netcoreapp2.1\ILS.dll
+C:\Users\Gabe Scott\source\repos\ILS\obj\Debug\netcoreapp2.1\ILS.pdb

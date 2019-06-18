@@ -15,7 +15,7 @@ namespace ILS
         public static readonly string VARTYPESTR = "string" ;
         public static readonly string[] PUBLICFUNCTIONS = Functions.FUNCTIONNAMES;
 
-
+        //TODO: Delete this function. Put it in the parser function. Add each type in the type method
         public static TokenType GetType(string str)
         {
             if (str == BEGINFILE)
@@ -38,6 +38,13 @@ namespace ILS
                 return TokenType.UNKNOWN;
         }
 
+        private static bool IsValidValue(string str)
+        {
+            if (str.Contains('"'))
+            {
+
+            }
+        }
 
         private static bool IsValidVarName(string str)
         {

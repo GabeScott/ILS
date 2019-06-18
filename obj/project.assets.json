@@ -694,11 +694,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Gabe Scott\\Desktop\\ILS\\ILS.csproj",
+      "projectUniqueName": "C:\\Users\\Gabe Scott\\source\\repos\\ILS\\ILS.csproj",
       "projectName": "ILS",
-      "projectPath": "C:\\Users\\Gabe Scott\\Desktop\\ILS\\ILS.csproj",
+      "projectPath": "C:\\Users\\Gabe Scott\\source\\repos\\ILS\\ILS.csproj",
       "packagesPath": "C:\\Users\\Gabe Scott\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Gabe Scott\\Desktop\\ILS\\obj\\",
+      "outputPath": "C:\\Users\\Gabe Scott\\source\\repos\\ILS\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

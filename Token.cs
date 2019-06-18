@@ -30,5 +30,10 @@ namespace ILS
         {
             return type;
         }
+
+        public void SetType(TokenType t)
+        {
+            this.type = t;
+        }
     }
 }
