@@ -9,9 +9,9 @@ namespace ILS
        
         static void Main(string[] args)
         {
-            string ILSLFilename = "C:/Users/gabe.scott/Desktop/ILS.ils";
+            string ILSFilename = "C:\\Users\\Gabe Scott\\source\\repos\\ILS\\ILS.ils";
 
-            File file = new File(ILSLFilename);
+            File file = new File(ILSFilename);
 
             try
             {

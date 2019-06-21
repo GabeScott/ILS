@@ -6,6 +6,9 @@ namespace ILS
 {
     static class Constants
     {
+        public static char emptySpaceAfterToken = ' ';
+        public static char decimalPoint = '.';
+
         private static Dictionary<string, TokenType> ConstantToTokenType = new Dictionary<string, TokenType> {
             {  "ILS!", TokenType.BEGINFILE},
             {  "SLM!", TokenType.ENDFILE },
@@ -15,6 +18,8 @@ namespace ILS
             {  "string" ,TokenType.DECLARESTR}
 
         };
+
+        private static char[] stringLiteralIdentifiers = new char[] { '\'', '"'};
 
         public static string GetConstantByTokenType(TokenType tokenTypeToTest)
         {
@@ -38,6 +43,11 @@ namespace ILS
                 return TokenType.VALUE;
             else
                 return TokenType.UNKNOWN;
+        }
+
+        public static bool IsValidStringLiteralStart(char charToTest)
+        {
+            return Array.Exists(stringLiteralIdentifiers, element => element == charToTest);
         }
 
         private static bool IsValidVarName(string tokenToTest)
@@ -69,7 +79,7 @@ namespace ILS
             int index = 0;
             char currChar = tokenToTest[index];
 
-            if (currChar == '\'')
+            if (IsValidStringLiteralStart(currChar))
                 return IsValidStringLiteral(tokenToTest);
             else if (char.IsDigit(currChar) || currChar == '.')
                 return IsValidNumberValue(tokenToTest);
@@ -79,16 +89,20 @@ namespace ILS
 
         private static bool IsValidStringLiteral(string tokenToTest)
         {
-            int index = 1;
-            char currChar = tokenToTest[index];
+            char stringLiteralStart = tokenToTest[0];
 
-            while (currChar != '\'' && index < tokenToTest.Length)
+            int index = 1;
+            char currChar;
+
+            do
             {
                 currChar = tokenToTest[index];
                 index++;
             }
+            while (!IsValidStringLiteralStart(currChar) && index < tokenToTest.Length);
 
-            return currChar == '\'';
+
+            return currChar == stringLiteralStart;
 
         }
 

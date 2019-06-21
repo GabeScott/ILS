@@ -9,6 +9,7 @@ namespace ILS
         private List<Token> tokens;
         private int currentToken = 0;
         public int LineNumberInFile {get; }
+
         public TokenLine(string line, int linenum)
         {
             LineNumberInFile = linenum;
@@ -23,16 +24,13 @@ namespace ILS
 
         public Token GetNextToken()
         {
-            if (currentToken >= tokens.Count - 1 || tokens.Count == 0)
+            if (currentToken >= tokens.Count || tokens.Count == 0)
                 return null;
 
             return tokens[currentToken++];
         }
 
-        public Token GetCurrentToken()
-        {
-            return tokens[currentToken-1];
-        }
+
 
         public Token GetTokenAt(int index)
         {
@@ -42,25 +40,16 @@ namespace ILS
             return tokens[index];
         }
 
-        public Token GetLastToken()
-        {
-            return tokens[tokens.Count - 1];
-        }
+        public bool ContainsEndOfFile() => tokens.Exists(element => element.Type == TokenType.ENDFILE);
+        public Token GetCurrentToken() => tokens[currentToken];
 
-        public int GetNumTokens()
-        {
-            return tokens.Count-1;
-        }
+        public Token GetLastToken() => tokens[tokens.Count - 1];
 
-        public bool IsEmpty()
-        {
-            return tokens.Count == 0;
-        }
+        public int GetNumTokens() => tokens.Count - 1;
 
-        public bool HasNext()
-        {
-            return currentToken < tokens.Count-1;
-        }
+        public bool IsEmpty() => tokens.Count == 0;
+
+        public bool HasNext() => currentToken < tokens.Count;
 
     }
 }

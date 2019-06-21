@@ -27,7 +27,7 @@ namespace ILS
         {
             ReadInput();
 
-            while (currentIndex < FileLineTokens.Count - 1)//TODO Make it loop until the SLM! is found, as there could be two SLM! 
+            while (currentIndex < FileLineTokens.Count)//TODO Make it loop until the SLM! is found, as there could be two SLM! 
             {
                 TryLastTokenInLine();
 
@@ -43,6 +43,7 @@ namespace ILS
                     RunFunction();
 
 
+
                 currentIndex++;
             }
         }
@@ -56,16 +57,23 @@ namespace ILS
             string temp = sr.ReadLine();
 
             int currentLineNumber = 1;
-            while (temp != null)
+
+            bool foundEndOfFile = false;
+
+            while (temp != null && !foundEndOfFile)
             {
-                FileLineTokens.Add(new TokenLine(temp.Trim(), currentLineNumber++));
+                TokenLine tl = new TokenLine(temp.Trim(), currentLineNumber++);
+
+                foundEndOfFile = tl.ContainsEndOfFile();
+                FileLineTokens.Add(tl);
+
                 temp = sr.ReadLine();
             }
             
             sr.Close();
 
             TryFileBeginToken();
-            TryFileEndToken();
+            //TryFileEndToken();
             RemoveEmptyTokenLines();
 
         }
@@ -151,7 +159,7 @@ namespace ILS
         {
             Token lastToken = FileLineTokens[currentIndex].GetLastToken();
 
-            if (lastToken.Type != TokenType.ENDLINE)
+            if (lastToken.Type != TokenType.ENDLINE && lastToken.Type != TokenType.ENDFILE)
                 throw new InvalidEndLineException("Expected " + Constants.GetConstantByTokenType(TokenType.ENDLINE) + " at the end of the line");
         }
 
@@ -161,8 +169,18 @@ namespace ILS
 
             List<Token> functionArguments = new List<Token>();
 
+            Token currToken = null;
+            TokenType tt = TokenType.VALUE;
+
+
             while (FileLineTokens[currentIndex].HasNext())
-                functionArguments.Add(FileLineTokens[currentIndex].GetNextToken());
+            {
+                currToken = FileLineTokens[currentIndex].GetNextToken();
+                tt = currToken.Type;
+
+                if(tt == TokenType.VARIABLE || tt == TokenType.VALUE)
+                    functionArguments.Add(currToken);
+            }
 
             Functions.RunFunction(functionName, functionArguments.ToArray());
 

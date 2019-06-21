@@ -58,7 +58,7 @@ namespace ILS
             string cleanedString = "";
 
             foreach (char c in stringLiteral)
-                if (c != '\'')
+                if (!Constants.IsValidStringLiteralStart(c))
                     cleanedString += c;
 
             return cleanedString;

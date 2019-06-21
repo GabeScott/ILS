@@ -22,14 +22,8 @@ namespace ILS
             Type = tt;
         }
 
-        override public string ToString()
-        {
-            return token;
-        }
+        override public string ToString() => token;
 
-        public bool IsTypeOf(TokenType tt)
-        {
-            return Type == tt;
-        }
+        public bool IsTypeOf(TokenType tt) => Type == tt;
     }
 }

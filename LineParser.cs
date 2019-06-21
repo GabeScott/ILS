@@ -18,6 +18,7 @@ namespace ILS
         private int lineNumberInFile;
 
         private bool inputHasBeenParsed = false;
+        private bool foundEndOfFile = false;
 
         public LineParser(string unparsedLine, int lineNumberInFile)
         {
@@ -39,25 +40,30 @@ namespace ILS
 
         private void LoadInputAndParse()
         {
+            char currChar;
 
             while (beginTokenIndex < unparsedLineCharArray.Length)
             {
-                char currChar = unparsedLineCharArray[endTokenIndex];
+                currChar = unparsedLineCharArray[endTokenIndex];
                  
-                if (char.IsDigit(currChar) || currChar == '.')
-                    GetNumberValue();
+                if (char.IsDigit(currChar) || currChar == Constants.decimalPoint)
+                    SetNumberValueIndexes();
 
                 else if (char.IsLetter(currChar))
-                    GetKeyword();
+                    SetKeywordIndexes();
 
-                else if (currChar == '\'')
-                    GetStringLiteral();
+                else if (Constants.IsValidStringLiteralStart(currChar))
+                    SetStringLiteralIndexes();
+
+                AddCurrentToken();
+                UpdateTokenIndexes();
+                CheckForEndOfFileToken();
             }
 
             inputHasBeenParsed = true;
         }
 
-        private void GetNumberValue()
+        private void SetNumberValueIndexes()
         {
             int numDecimals = 0;
             char currChar;
@@ -67,21 +73,19 @@ namespace ILS
             {
                 currChar = unparsedLineCharArray[endTokenIndex];
 
-                if (currChar == '.')
+                if (currChar == Constants.decimalPoint)
                     numDecimals++;
                 
-               validDecimalNumber = (currChar == '.') && numDecimals <= 1;
+               validDecimalNumber = (currChar == Constants.decimalPoint) && numDecimals <= 1;
 
                 endTokenIndex++;
             }
             while ((char.IsDigit(currChar) || validDecimalNumber) && endTokenIndex < unparsedLineCharArray.Length);
 
-            if (currChar != ' ')
+            if (currChar != Constants.emptySpaceAfterToken)
                 throw new InvalidTokenException("Invalid token: " + GetTokenFromIndexes() + " on line number " + lineNumberInFile);
 
-            tokensFoundInLine.Add(new Token(GetTokenFromIndexes(), TokenType.VALUE));
-
-            beginTokenIndex = endTokenIndex;
+            endTokenIndex--;
         }
 
 
@@ -91,71 +95,74 @@ namespace ILS
         }
 
 
+        private void SetKeywordIndexes()
+        {
+            char currChar;
+
+            do
+            {
+                currChar = unparsedLineCharArray[endTokenIndex];
+                endTokenIndex++;
+            }
+            while (IsValidKeywordChar(currChar) && endTokenIndex < unparsedLineCharArray.Length);
+
+
+            if (currChar != Constants.emptySpaceAfterToken && endTokenIndex < unparsedLineCharArray.Length)
+                throw new InvalidTokenException("Invalid token on line " + lineNumberInFile);
+
+            endTokenIndex = (endTokenIndex == unparsedLineCharArray.Length) ? endTokenIndex : --endTokenIndex;
+
+
+        }
 
         private bool IsValidKeywordChar(char c)
         {
             return (char.IsLetterOrDigit(c) || c == '_' || c == '!') && c != ' ';
         }
 
-
-        private void GetKeyword()
+        private void SetStringLiteralIndexes()
         {
-            char currChar = unparsedLineCharArray[endTokenIndex];
+            char singleOrDoubleQuote = unparsedLineCharArray[endTokenIndex];
+
             endTokenIndex++;
+            char currChar;
 
-            while (IsValidKeywordChar(currChar) && endTokenIndex < unparsedLineCharArray.Length)
+            do
             {
-
                 currChar = unparsedLineCharArray[endTokenIndex];
                 endTokenIndex++;
             }
+            while (currChar != singleOrDoubleQuote && endTokenIndex < unparsedLineCharArray.Length);
 
-
-            if (currChar != ' ' && endTokenIndex < unparsedLineCharArray.Length)
-                throw new InvalidTokenException("Invalid token");
-
-
-            string tokenContents;
 
             if (endTokenIndex == unparsedLineCharArray.Length)
-                tokenContents = unparsedLine.Substring(beginTokenIndex, endTokenIndex - beginTokenIndex);
-            else
-                tokenContents = unparsedLine.Substring(beginTokenIndex, endTokenIndex - beginTokenIndex - 1);
+                throw new TooFewTokensException("Reached end of line while parsing on line " + lineNumberInFile);
 
+            char shouldBeEmptySpace = unparsedLineCharArray[endTokenIndex];
 
-            tokensFoundInLine.Add(new Token(tokenContents, Constants.GetTokenTypeByConstant(tokenContents)));
-
-            beginTokenIndex = endTokenIndex;
+            if (shouldBeEmptySpace != Constants.emptySpaceAfterToken)
+                throw new InvalidTokenException("Invalid token on line " + lineNumberInFile);
 
         }
 
-        private void GetStringLiteral()
+        private void AddCurrentToken()
         {
-            char targetChar = unparsedLineCharArray[endTokenIndex];
+            string tokenToAdd = GetTokenFromIndexes();
+            tokensFoundInLine.Add(new Token(tokenToAdd, Constants.GetTokenTypeByConstant(tokenToAdd)));
+        }
 
-            endTokenIndex++;
-            char currChar = unparsedLineCharArray[endTokenIndex];
-
-            while (currChar != targetChar && endTokenIndex < unparsedLineCharArray.Length)
-            {
-                currChar = unparsedLineCharArray[endTokenIndex];
-                endTokenIndex++;
-            }
-
-            if (endTokenIndex == unparsedLineCharArray.Length)
-                throw new TooFewTokensException("Reached end of line while parsing");
-
-
-            char spaceAfterToken = unparsedLineCharArray[endTokenIndex];
-
-            if (spaceAfterToken != ' ' && endTokenIndex < unparsedLineCharArray.Length)
-                throw new InvalidTokenException("Invalid token");
-
-            string tokenContents = unparsedLine.Substring(beginTokenIndex, endTokenIndex - beginTokenIndex);
-            tokensFoundInLine.Add(new Token(tokenContents, TokenType.VALUE));
-
-
+        private void UpdateTokenIndexes()
+        {
             beginTokenIndex = ++endTokenIndex;
+        }
+
+        private void CheckForEndOfFileToken()
+        {
+            if (tokensFoundInLine[tokensFoundInLine.Count - 1].Type == TokenType.ENDFILE)
+            {
+                foundEndOfFile = true;
+                beginTokenIndex = unparsedLineCharArray.Length;
+            }
         }
     }
 }

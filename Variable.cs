@@ -8,7 +8,7 @@ namespace ILS
     {
         protected TokenType type = TokenType.VARIABLE;
         protected string name;
-        new public abstract TokenType GetType();
+        new public TokenType GetType() => type;
         public Variable(string name)
         {
             this.name = name;
@@ -26,20 +26,9 @@ namespace ILS
             this.val = val;
         }
 
-        override public TokenType GetType()
-        {
-            return type;
-        }
+        public double GetVal() => val;
 
-        public double GetVal()
-        {
-            return val;
-        }
-
-        override public string GetValAsString()
-        {
-            return val.ToString();
-        }
+        override public string GetValAsString() => val.ToString();
 
 
     }
@@ -52,16 +41,7 @@ namespace ILS
         {
             this.val = val;
         }
-
-        override public TokenType GetType()
-        {
-            return type;
-        }
-
-        override public string GetValAsString()
-        {
-            return val;
-        }
+        override public string GetValAsString() => val.ToString();
 
 
     }
