@@ -8,30 +8,37 @@ namespace ILS
     {
         private List<Token> tokens;
         private int currentToken = 0;
-        public TokenLine(string Line)
+        public int LineNumberInFile {get; }
+        public TokenLine(string line, int linenum)
         {
+            LineNumberInFile = linenum;
+
             tokens = new List<Token>();
 
-            Parser parser = new Parser(Line);
-            parser.Run();
+            LineParser parser = new LineParser(line, LineNumberInFile);
 
-            foreach (string str in parser.GetTokens())
-                tokens.Add(new Token(str));
+            foreach (Token t in parser.GetTokens())
+                tokens.Add(t);
         }
 
         public Token GetNextToken()
         {
-            if (tokens.Count == 0)
-                throw new ILSTooFewTokensException("Token Line has no tokens");
-
-            if (currentToken >= tokens.Count-1 && tokens.Count >= 0)
+            if (currentToken >= tokens.Count - 1 || tokens.Count == 0)
                 return null;
 
             return tokens[currentToken++];
         }
 
+        public Token GetCurrentToken()
+        {
+            return tokens[currentToken-1];
+        }
+
         public Token GetTokenAt(int index)
         {
+            if (index >= tokens.Count)
+                return null;
+
             return tokens[index];
         }
 
@@ -45,9 +52,15 @@ namespace ILS
             return tokens.Count-1;
         }
 
+        public bool IsEmpty()
+        {
+            return tokens.Count == 0;
+        }
+
         public bool HasNext()
         {
             return currentToken < tokens.Count-1;
         }
+
     }
 }

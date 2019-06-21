@@ -9,11 +9,10 @@ namespace ILS
         UNKNOWN,
         BEGINFILE,
         ENDFILE,
-        BEGINLINE,
         ENDLINE,
         SETVAR,
-        VARTYPENUM,
-        VARTYPESTR,
+        DECLARENUM,
+        DECLARESTR,
         FUNCTION,
         VARIABLE,
         VALUE 

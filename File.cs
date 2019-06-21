@@ -8,180 +8,166 @@ namespace ILS
     class File
     {
         private List<TokenLine> FileLineTokens;
-        private string FileName;
+        private readonly string FileName;
         private int currentIndex = 0;
+
+        private readonly int VAR_NAME_INDEX = 0;
+        private readonly int SET_VAR_INDEX = 1;
+        private readonly int VAR_TYPE_INDEX = 2;
+        private readonly int VAL_INDEX = 3;
+
+        private readonly int FUNCTION_NAME_INDEX = 0;
 
         public File(string file)
         {
             FileName = file;
         }
 
-        public void ReadInput()
+        public void LoadInputAndExecute()
+        {
+            ReadInput();
+
+            while (currentIndex < FileLineTokens.Count - 1)//TODO Make it loop until the SLM! is found, as there could be two SLM! 
+            {
+                TryLastTokenInLine();
+
+                Token firstTokenInLine = FileLineTokens[currentIndex].GetNextToken();
+                TokenType type = firstTokenInLine.Type;
+
+                if (type == TokenType.VARIABLE)
+                {
+                    CheckVariableSetterTokens();
+                    AddNewVariable();
+                }
+                else if (type == TokenType.FUNCTION)
+                    RunFunction();
+
+
+                currentIndex++;
+            }
+        }
+
+        private void ReadInput()
         {
             FileLineTokens = new List<TokenLine>();
-
 
             StreamReader sr = new StreamReader(FileName);
 
             string temp = sr.ReadLine();
 
+            int currentLineNumber = 1;
             while (temp != null)
             {
-                FileLineTokens.Add(new TokenLine(temp.Trim()));
+                FileLineTokens.Add(new TokenLine(temp.Trim(), currentLineNumber++));
                 temp = sr.ReadLine();
             }
-
+            
             sr.Close();
 
+            TryFileBeginToken();
+            TryFileEndToken();
+            RemoveEmptyTokenLines();
 
         }
 
-
-        public void Interpret()
+        private void TryFileBeginToken()
         {
-            try
-            {
-                TryStart();
-                TryEnd();
-            }catch(Exception e)
-            {
-                Logger.LogErrorAndQuit(e.Message);
-            }
+            Token firstToken = FileLineTokens[0].GetTokenAt(0);
 
-
-
-            while(currentIndex < FileLineTokens.Count-1)
-            {
-                if (FileLineTokens[currentIndex].HasNext())
-                {
-                    Token curToken = FileLineTokens[currentIndex].GetNextToken();
-                    TokenType type = curToken.GetType();
-
-                    if (curToken.ToString() != "")
-                    {
-                        if (type == TokenType.VARIABLE)
-                            try
-                            {
-                                AddNewVariable(curToken.ToString());
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.LogErrorAndQuit(e.Message);
-                            }
-                        else if (type == TokenType.FUNCTION)
-                            try
-                            {
-                                RunFunction(curToken.ToString());
-                            }
-                            catch (Exception e)
-                            {
-                                Logger.LogErrorAndQuit(e.Message);
-                            }
-                    }
-                }
-
-                currentIndex++;
-            }
-
-
-          
-
-        }
-
-        private void TryStart()
-        {
-            if (GetFirstToken().GetType() != TokenType.BEGINFILE)
-                throw new Exception("Invalid BeginLine Token");
+            if (!firstToken.IsTypeOf(TokenType.BEGINFILE))
+                throw new InvalidBeginFileException("Invalid Begin File Token: " + firstToken.ToString());
             currentIndex = 1;
 
         }
 
-        private void TryEnd()
+        private void TryFileEndToken()
         {
-            if (GetLastToken().GetType() != TokenType.ENDFILE)
-                throw new Exception("Invalid End Line Token");
+            Token lastToken = FileLineTokens[FileLineTokens.Count-1].GetTokenAt(0);
+
+            if (!lastToken.IsTypeOf(TokenType.ENDFILE))
+                throw new InvalidEndFileException("Invalid End File Token: " + lastToken.ToString());
         }
 
-        private Token GetFirstToken()
+
+
+        private void RemoveEmptyTokenLines()
         {
-            return FileLineTokens[0].GetTokenAt(0);
+            for (int i = 0; i < FileLineTokens.Count; i++)
+            {
+                TokenLine tl = FileLineTokens[i];
+                if (tl.IsEmpty())
+                {
+                    FileLineTokens.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
-        private Token GetLastToken()
+        private void CheckVariableSetterTokens()
         {
-            int len = FileLineTokens.Count;
-            return FileLineTokens[len-1].GetTokenAt(0);
+            Token setvartoken, typetoken;
+
+            setvartoken = FileLineTokens[currentIndex].GetTokenAt(SET_VAR_INDEX);
+            typetoken = FileLineTokens[currentIndex].GetTokenAt(VAR_TYPE_INDEX);
+
+
+            if (setvartoken == null || typetoken == null)
+                throw new TooFewTokensException("Expected more tokens on line " + FileLineTokens[currentIndex].LineNumberInFile);
+
+            if (!setvartoken.IsTypeOf(TokenType.SETVAR))
+                throw new InvalidTokenException("Invalid setvar token one line " + FileLineTokens[currentIndex].LineNumberInFile);
+
+            if(!typetoken.IsTypeOf(TokenType.DECLARENUM) && !typetoken.IsTypeOf(TokenType.DECLARESTR))
+                throw new InvalidTokenException("Invalid variable type token one line " + FileLineTokens[currentIndex].LineNumberInFile);
         }
 
-        private void RunFunction(string function)
+        private void AddNewVariable()
         {
-            List<Token> paramTokens = new List<Token>();
+
+            Token nametoken, typetoken, valtoken;
+
+            nametoken = FileLineTokens[currentIndex].GetTokenAt(VAR_NAME_INDEX);
+            typetoken = FileLineTokens[currentIndex].GetTokenAt(VAR_TYPE_INDEX);
+            valtoken = FileLineTokens[currentIndex].GetTokenAt(VAL_INDEX);
+
+            string name = nametoken.ToString();
+            string varValue = valtoken.ToString();
+
+
+            if (typetoken.IsTypeOf(TokenType.DECLARENUM))
+            {
+                if (double.TryParse(varValue, out double result))
+                    VariableMap.AddNewVariable(name, new NumberVariable(name, result));
+                else
+                    throw new InvalidNumberValueException("Invalid number value");
+            }
+            else if (typetoken.IsTypeOf(TokenType.DECLARESTR))
+                VariableMap.AddNewVariable(name, new StringVariable(name, varValue));
+
+
+        }
+
+        private void TryLastTokenInLine()
+        {
+            Token lastToken = FileLineTokens[currentIndex].GetLastToken();
+
+            if (lastToken.Type != TokenType.ENDLINE)
+                throw new InvalidEndLineException("Expected " + Constants.GetConstantByTokenType(TokenType.ENDLINE) + " at the end of the line");
+        }
+
+        private void RunFunction()
+        {
+            string functionName = FileLineTokens[currentIndex].GetTokenAt(FUNCTION_NAME_INDEX).ToString();
+
+            List<Token> functionArguments = new List<Token>();
 
             while (FileLineTokens[currentIndex].HasNext())
-                paramTokens.Add(FileLineTokens[currentIndex].GetNextToken());
+                functionArguments.Add(FileLineTokens[currentIndex].GetNextToken());
 
-            Functions.RunFunction(function, paramTokens.ToArray());
-
-
-            var endlinetoken = FileLineTokens[currentIndex].GetLastToken();
-
-            try
-            {
-                TryLastTokenInLine(endlinetoken);
-            }
-            catch
-            {
-                throw;
-            }
+            Functions.RunFunction(functionName, functionArguments.ToArray());
 
 
         }
 
-        private void AddNewVariable(string name)
-        {
-
-            Token setvartoken, typetoken, valtoken, endlinetoken;
-
-            setvartoken = FileLineTokens[currentIndex].GetNextToken();
-            typetoken = FileLineTokens[currentIndex].GetNextToken();
-            valtoken = FileLineTokens[currentIndex].GetNextToken();
-
-            if (FileLineTokens[currentIndex].HasNext())
-                throw new ILSTooManyTokensException("Unexpected Token: " + FileLineTokens[currentIndex].GetNextToken());
-
-            endlinetoken = FileLineTokens[currentIndex].GetLastToken();
-
-            if (setvartoken == null || typetoken == null || valtoken == null || endlinetoken == null)
-                throw new ILSTooFewTokensException("Expected more tokens on line " + (currentIndex+1));
-
-            if (setvartoken.GetType() == TokenType.SETVAR && typetoken.GetType() == TokenType.VARTYPENUM && valtoken.GetType() == TokenType.VARIABLE)
-            {
-                double result;
-                if (Double.TryParse(valtoken.ToString(), out result))
-                    VariableMap.AddNewVariable(name, new ILSVariableNum(name, result));
-                else
-                    throw new Exception("Invalid number value");
-            }
-
-            else if (setvartoken.GetType() == TokenType.SETVAR && typetoken.GetType() == TokenType.VARTYPESTR && valtoken.GetType() == TokenType.VARIABLE)
-            {
-                VariableMap.AddNewVariable(name, new ILSVariableStr(name, valtoken.ToString()));
-            }
-
-            try
-            {
-                TryLastTokenInLine(endlinetoken);
-            }catch(Exception e)
-            {
-                throw;
-            }
-
-        }
-
-        private void TryLastTokenInLine(Token lastToken)
-        {
-            if (lastToken.GetType() != TokenType.ENDLINE)
-                throw new Exception("Expected " + Constants.ENDLINE + " at the end of the line");
-        }
     }
 }

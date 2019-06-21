@@ -4,27 +4,54 @@ using System.Text;
 
 namespace ILS
 {
-    abstract class Exceptions : Exception
+    abstract class ILSException : Exception
     {
 
-        public Exceptions(string m) : base(m) { }
+        public ILSException(string m) : base(m) { }
 
     }
 
-    class ILSTooManyTokensException : Exceptions
+    class TooManyTokensException : ILSException
     {
-        public ILSTooManyTokensException(string m) : base("Error of type ILSTooManyExceptions thrown: " + m) { }
+        public TooManyTokensException(string m) : base("Error of type ILSTooManyExceptions thrown: " + m) { }
     }
 
-    class ILSTooFewTokensException : Exceptions
+    class TooFewTokensException : ILSException
     {
-        public ILSTooFewTokensException(string m) : base("Error of type ILSTooFewExceptions thrown: " + m) { }
+        public TooFewTokensException(string m) : base("Error of type ILSTooFewExceptions thrown: " + m) { }
     }
 
-    class InvalidTokenException : Exceptions
+    class InvalidNumberValueException : ILSException
     {
-        public InvalidTokenException(string m) : base("Error of type ILSTooFewExceptions thrown: " + m) { }
+        public InvalidNumberValueException(string m) : base("Error of type InvalidNumberValueException thrown: " + m) { }
     }
+
+    class InvalidBeginFileException : ILSException
+    {
+        public InvalidBeginFileException(string m) : base("Error of type InvalidBeginFileException thrown: " + m) { }
+    }
+
+    class InvalidEndFileException : ILSException
+    {
+        public InvalidEndFileException(string m) : base("Error of type InvalidEndFileException thrown: " + m) { }
+    }
+
+    class InvalidEndLineException : ILSException
+    {
+        public InvalidEndLineException(string m) : base("Error of type InvalidEndLineException thrown: " + m) { }
+    }
+
+    class InvalidTokenException : ILSException
+    {
+        public InvalidTokenException(string m) : base("Error of type InvalidTokenException thrown: " + m) { }
+    }
+
+    class NoTokenInLineException : ILSException
+    {
+        public NoTokenInLineException(string m) : base("Error of type NoTokenInLineException thrown: " + m) { }
+    }
+
+
 
 
 }

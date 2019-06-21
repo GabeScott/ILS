@@ -6,61 +6,99 @@ namespace ILS
 {
     static class Constants
     {
+        private static Dictionary<string, TokenType> ConstantToTokenType = new Dictionary<string, TokenType> {
+            {  "ILS!", TokenType.BEGINFILE},
+            {  "SLM!", TokenType.ENDFILE },
+            {  "next" , TokenType.ENDLINE},
+            {  "is" , TokenType.SETVAR},
+            {  "number" , TokenType.DECLARENUM},
+            {  "string" ,TokenType.DECLARESTR}
 
-        public static readonly string BEGINFILE = "ILS!";
-        public static readonly string ENDFILE = "SLM!";
-        public static readonly string ENDLINE = "next";
-        public static readonly string SETVAR = "is";
-        public static readonly string VARTYPENUM = "number";
-        public static readonly string VARTYPESTR = "string" ;
-        public static readonly string[] PUBLICFUNCTIONS = Functions.FUNCTIONNAMES;
+        };
 
-        //TODO: Delete this function. Put it in the parser function. Add each type in the type method
-        public static TokenType GetType(string str)
+        public static string GetConstantByTokenType(TokenType tokenTypeToTest)
         {
-            if (str == BEGINFILE)
-                return TokenType.BEGINFILE;
-            else if (str == ENDFILE)
-                return TokenType.ENDFILE;
-            else if (str == ENDLINE)
-                return TokenType.ENDLINE;
-            else if (str == SETVAR)
-                return TokenType.SETVAR;
-            else if (str == VARTYPENUM)
-                return TokenType.VARTYPENUM;
-            else if (str == VARTYPESTR)
-                return TokenType.VARTYPESTR;
-            else if (Array.IndexOf(PUBLICFUNCTIONS, str) != -1)
+            foreach (string s in ConstantToTokenType.Keys)
+                if (tokenTypeToTest == ConstantToTokenType.GetValueOrDefault(s))
+                    return s;
+
+            return null;
+        }
+
+        public static TokenType GetTokenTypeByConstant(string tokenToTest)
+        {
+            if (ConstantToTokenType.ContainsKey(tokenToTest))
+                return ConstantToTokenType.GetValueOrDefault(tokenToTest);
+
+            else if (Functions.IsValidFunction(tokenToTest))
                 return TokenType.FUNCTION;
-            else if (IsValidVarName(str))
+            else if (IsValidVarName(tokenToTest))
                 return TokenType.VARIABLE;
+            else if (IsValidValue(tokenToTest))
+                return TokenType.VALUE;
             else
                 return TokenType.UNKNOWN;
         }
 
-        private static bool IsValidValue(string str)
+        private static bool IsValidVarName(string tokenToTest)
         {
-            if (str.Contains('"'))
-            {
 
+            if (tokenToTest.Length == 0)
+                return false;
+
+            char firstLetter = tokenToTest[0];
+
+            if (!char.IsLetter(firstLetter))
+                return false;
+
+            string restOfLetters = tokenToTest.Substring(1);
+
+            foreach (char c in restOfLetters)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '_')
+                    return false;
             }
+
+            return true;
+
         }
 
-        private static bool IsValidVarName(string str)
+
+        private static bool IsValidValue(string tokenToTest)
         {
+            int index = 0;
+            char currChar = tokenToTest[index];
 
-            if (str.Length > 0 && Char.IsLetter(str[0]))
-            {
-                foreach (char c in str.Substring(1))
-                {
-                    if (!Char.IsLetterOrDigit(c) && !(c == '_'))
-                        return false;
-                }
+            if (currChar == '\'')
+                return IsValidStringLiteral(tokenToTest);
+            else if (char.IsDigit(currChar) || currChar == '.')
+                return IsValidNumberValue(tokenToTest);
 
-                return true;
-            }
             return false;
         }
+
+        private static bool IsValidStringLiteral(string tokenToTest)
+        {
+            int index = 1;
+            char currChar = tokenToTest[index];
+
+            while (currChar != '\'' && index < tokenToTest.Length)
+            {
+                currChar = tokenToTest[index];
+                index++;
+            }
+
+            return currChar == '\'';
+
+        }
+
+        private static bool IsValidNumberValue(string tokenToTest)
+        {
+            double result;
+            return double.TryParse(tokenToTest, out result);
+        }
+
+
 
 
     }

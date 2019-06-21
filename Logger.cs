@@ -7,16 +7,16 @@ namespace ILS
     static class Logger
     {
 
-        public static void LogErrorAndQuit(string m)
+        public static void LogErrorAndQuit(string errorMessage)
         {
-            Console.WriteLine(m);
+            Console.WriteLine(errorMessage);
             Console.ReadKey();
             Environment.Exit(0);
         }
 
-        public static void LogError(string m)
+        public static void LogError(string errorMessage)
         {
-            Console.WriteLine(m);
+            Console.WriteLine(errorMessage);
             Console.ReadKey();
         }
 

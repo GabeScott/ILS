@@ -6,33 +6,62 @@ namespace ILS
 {
     static class Functions
     {
-
-        public static readonly string[] FUNCTIONNAMES = { "PRINT", "PRINTN" };
-
-        public static void RunFunction(string function, Token[] paramTokens)
+        public enum FunctionName
         {
-            if (function == FUNCTIONNAMES[0])
-                RunPrint(paramTokens, false);
-            else if (function == FUNCTIONNAMES[1])
-                RunPrint(paramTokens, true);
+            PRINT,
+            PRINTN
+        }
+
+
+
+        public static bool IsValidFunction(string tokenToTest)
+        {
+            foreach (FunctionName fn in Enum.GetValues(typeof(FunctionName)))
+            {
+                if (Enum.TryParse(tokenToTest, out FunctionName result))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static void RunFunction(string function, Token[] functionArguments)
+        {
+            string output = GetOutput(functionArguments);
+
+            FunctionName result;
+            Enum.TryParse(function, out result);
+
+            if (result == FunctionName.PRINT)
+                Console.Write(output);
+
+            else if (result == FunctionName.PRINTN)
+                Console.WriteLine(output);
 
         }
 
-        private static void RunPrint(Token[] paramTokens, bool newline) {
-            string s = "";
+        private static string GetOutput(Token[] functionArguments)
+        {
+            string output = "";
 
-            foreach (Token i in paramTokens)
-            {
-                if (i.GetType() == TokenType.VARIABLE)
-                    s += VariableMap.GetVarByName(i.ToString()).GetValAsString();
+            foreach (Token t in functionArguments)
+                if (t.Type == TokenType.VARIABLE)
+                    output += VariableMap.GetVarByName(t.ToString()).GetValAsString();
                 else
-                    s += i.ToString();
-            }
+                    output += t.ToString();
 
-            if (newline)
-                Console.WriteLine(s);
-            else
-                Console.Write(s);
+            return CleanStringLiteral(output);
+        }
+
+        private static string CleanStringLiteral(string stringLiteral)
+        {
+            string cleanedString = "";
+
+            foreach (char c in stringLiteral)
+                if (c != '\'')
+                    cleanedString += c;
+
+            return cleanedString;
         }
 
     }

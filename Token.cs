@@ -8,12 +8,18 @@ namespace ILS
     class Token
     {
         private string token;
-        private TokenType type;
+        public TokenType Type { get; }
 
         public Token(string tok)
         {
             token = tok;
-            SetType();
+            Type = TokenType.UNKNOWN;
+        }
+
+        public Token(string tok, TokenType tt)
+        {
+            token = tok;
+            Type = tt;
         }
 
         override public string ToString()
@@ -21,19 +27,9 @@ namespace ILS
             return token;
         }
 
-        public void SetType()
+        public bool IsTypeOf(TokenType tt)
         {
-            type = Constants.GetType(token);
-        }
-
-        new public TokenType GetType()
-        {
-            return type;
-        }
-
-        public void SetType(TokenType t)
-        {
-            this.type = t;
+            return Type == tt;
         }
     }
 }
