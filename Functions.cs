@@ -4,27 +4,20 @@ using System.Text;
 
 namespace ILS
 {
-    static class Functions
-    {
-        public enum FunctionName
+
+    public enum FunctionName
         {
             PRINT,
-            PRINTN
+            PRINTN,
+            UPDATE, 
+            JUMPTO,
+            JUMPONCE,
+            RETURN
         }
 
 
-
-        public static bool IsValidFunction(string tokenToTest)
-        {
-            foreach (FunctionName fn in Enum.GetValues(typeof(FunctionName)))
-            {
-                if (Enum.TryParse(tokenToTest, out FunctionName result))
-                    return true;
-            }
-
-            return false;
-        }
-
+    static class Functions
+    {
         public static void RunFunction(string function, Token[] functionArguments)
         {
             string output = GetOutput(functionArguments);
@@ -38,6 +31,18 @@ namespace ILS
             else if (result == FunctionName.PRINTN)
                 Console.WriteLine(output);
 
+            else if (result == FunctionName.UPDATE)
+                UpdateVariable(functionArguments);
+
+            else if (result == FunctionName.JUMPTO)
+                LinePointer.InsertJump(GetLineJumpNumber(functionArguments));
+
+            else if (result == FunctionName.JUMPONCE)
+                LinePointer.InsertJumpOnce(GetLineJumpNumber(functionArguments));
+
+            else if (result == FunctionName.RETURN)
+                ReturnPointer(functionArguments);
+
         }
 
         private static string GetOutput(Token[] functionArguments)
@@ -45,10 +50,12 @@ namespace ILS
             string output = "";
 
             foreach (Token t in functionArguments)
-                if (t.Type == TokenType.VARIABLE)
-                    output += VariableMap.GetVarByName(t.ToString()).GetValAsString();
-                else
+                if (t.IsTypeOf(TokenType.VARIABLE))
+                    output += VariableMap.GetVariableValue(t.ToString());
+                else if (t.IsTypeOf(TokenType.VALUE))
                     output += t.ToString();
+                else
+                    throw new InvalidTokenException("Unexpected token: " + t);
 
             return CleanStringLiteral(output);
         }
@@ -58,10 +65,40 @@ namespace ILS
             string cleanedString = "";
 
             foreach (char c in stringLiteral)
-                if (!Constants.IsValidStringLiteralStart(c))
+                if (c != Constants.stringLiteralIdentifier)
                     cleanedString += c;
 
             return cleanedString;
+        }
+
+        private static void UpdateVariable(Token[] functionArguments)
+        {
+            string variableName = functionArguments[0].ToString();
+            string variableVal = functionArguments[1].ToString();
+
+            VariableMap.UpdateVariable(variableName, variableVal);
+        }
+
+
+        private static int GetLineJumpNumber(Token[] functionArguments)
+        {
+            string lineToJumpTo = functionArguments[0].ToString();
+
+
+            bool validLineNumber = int.TryParse(lineToJumpTo, out int result);
+
+            if (!validLineNumber)
+                throw new InvalidJumpException("Invalid line jump request: " + lineToJumpTo);
+
+            return result;
+        }
+
+        private static void ReturnPointer(Token[] functionArguments)
+        {
+            if (functionArguments.Length > 0)
+                throw new InvalidReturnStatementException("Return does not take arguments");
+
+            LinePointer.ReturnMostRecent();
         }
 
     }

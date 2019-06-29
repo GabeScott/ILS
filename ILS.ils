@@ -1,6 +1,7 @@
 ILS!
 
-n is number 4 next
+n is number 4+9*8 next
+UPDATE n n*7 next
 s is string COOL next
 PRINT s next
 PRINTN s next

@@ -6,13 +6,14 @@ namespace ILS
 {
     abstract class Variable
     {
-        protected TokenType type = TokenType.VARIABLE;
-        protected string name;
-        new public TokenType GetType() => type;
+        public string Name { get; }
+        public new abstract TokenType GetType();
         public Variable(string name)
         {
-            this.name = name;
+            Name = name;
         }
+
+
 
         public abstract string GetValAsString();
 
@@ -25,6 +26,7 @@ namespace ILS
         {
             this.val = val;
         }
+        override public TokenType GetType() => TokenType.VARIABLENUM;
 
         public double GetVal() => val;
 
@@ -35,13 +37,15 @@ namespace ILS
 
     class StringVariable : Variable
     {
-        
         private string val;
         public StringVariable(string name, string val):base(name)
         {
             this.val = val;
         }
         override public string GetValAsString() => val.ToString();
+
+        override public TokenType GetType() => TokenType.VARIABLESTR;
+
 
 
     }

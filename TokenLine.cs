@@ -7,49 +7,34 @@ namespace ILS
     class TokenLine
     {
         private List<Token> tokens;
-        private int currentToken = 0;
-        public int LineNumberInFile {get; }
+        private readonly string unparsedLine;
 
-        public TokenLine(string line, int linenum)
+        private LineParser parser;
+        private LineInterpreter interpreter;
+
+        public TokenLine(string line)
         {
-            LineNumberInFile = linenum;
-
+            unparsedLine = line;
             tokens = new List<Token>();
 
-            LineParser parser = new LineParser(line, LineNumberInFile);
-
-            foreach (Token t in parser.GetTokens())
-                tokens.Add(t);
+            parser = new LineParser(unparsedLine);
         }
 
-        public Token GetNextToken()
+        public void ParseLine()
         {
-            if (currentToken >= tokens.Count || tokens.Count == 0)
-                return null;
-
-            return tokens[currentToken++];
+            if (tokens.Count == 0)
+                foreach (Token t in parser.GetTokens())
+                    tokens.Add(t);
         }
 
-
-
-        public Token GetTokenAt(int index)
+        public void Interpret()
         {
-            if (index >= tokens.Count)
-                return null;
-
-            return tokens[index];
+            if (tokens.Count > 0)
+            {
+                interpreter = new LineInterpreter(tokens.ToArray());
+                interpreter.Interpret();
+            }
         }
-
-        public bool ContainsEndOfFile() => tokens.Exists(element => element.Type == TokenType.ENDFILE);
-        public Token GetCurrentToken() => tokens[currentToken];
-
-        public Token GetLastToken() => tokens[tokens.Count - 1];
-
-        public int GetNumTokens() => tokens.Count - 1;
-
-        public bool IsEmpty() => tokens.Count == 0;
-
-        public bool HasNext() => currentToken < tokens.Count;
 
     }
 }

@@ -15,7 +15,11 @@ namespace ILS
         DECLARESTR,
         FUNCTION,
         VARIABLE,
-        VALUE 
+        VARIABLESTR,
+        VARIABLENUM,
+        VALUE,
+        HIGH_EXPRESSION,
+        LOW_EXPRESSION
 
     }
 }

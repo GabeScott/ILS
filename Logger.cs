@@ -22,6 +22,7 @@ namespace ILS
 
         public static void FoundEndOfFile()
         {
+            Console.WriteLine();
             Console.WriteLine("End of file token found. Exiting.");
             Console.ReadKey();
             Environment.Exit(0);

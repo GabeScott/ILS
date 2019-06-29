@@ -9,18 +9,18 @@ namespace ILS
        
         static void Main(string[] args)
         {
-            string ILSFilename = "C:\\Users\\Gabe Scott\\source\\repos\\ILS\\ILS.ils";
+            string ILSFilename = "C:/Users/Gabe Scott/Desktop/ILS.ils";
 
             File file = new File(ILSFilename);
 
             try
             {
                 file.LoadInputAndExecute();
-            } catch(ILSException e)
+            }catch(ILSException e)
             {
                 Console.WriteLine(e.Message);
             }
-            
+
 
             Console.ReadKey();
 
