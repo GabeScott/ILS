@@ -55,7 +55,7 @@ namespace ILS
                 else if (t.IsTypeOf(TokenType.VALUE))
                     output += t.ToString();
                 else
-                    throw new InvalidTokenException("Unexpected token: " + t);
+                    throw new ILSException("Unexpected token: " + t);
 
             return CleanStringLiteral(output);
         }
@@ -88,7 +88,7 @@ namespace ILS
             bool validLineNumber = int.TryParse(lineToJumpTo, out int result);
 
             if (!validLineNumber)
-                throw new InvalidJumpException("Invalid line jump request: " + lineToJumpTo);
+                throw new ILSException("Invalid line jump request: " + lineToJumpTo);
 
             return result;
         }
@@ -96,7 +96,7 @@ namespace ILS
         private static void ReturnPointer(Token[] functionArguments)
         {
             if (functionArguments.Length > 0)
-                throw new InvalidReturnStatementException("Return does not take arguments");
+                throw new ILSException("Return does not take arguments");
 
             LinePointer.ReturnMostRecent();
         }

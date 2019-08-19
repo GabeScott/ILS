@@ -1,20 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ILS
 {
     
-    class Token
+    public class Token
     {
         private readonly string tokenText;
         private TokenType type;
 
 
-        public Token(string tok)
+        public Token(string tok, TokenType type)
         {
             tokenText = tok;
-            SetTokenType();
+            this.type = type;
+
+            if(IsVagueType())
+                SpecifyType();
         }
 
 
@@ -30,34 +31,32 @@ namespace ILS
         }
 
 
+        private bool IsVagueType()
+        {
+            return IsTypeOf(TokenType.SINGLE_CHAR, TokenType.KEYWORD, TokenType.UNKNOWN);
+        }
+
+
         public bool IsExpressionToken()
         {
             return IsTypeOf(TokenType.HIGH_EXPRESSION, TokenType.LOW_EXPRESSION, TokenType.VARIABLE, TokenType.VALUE);
         }
 
 
-        private void SetTokenType()
+        public bool IsOperationToken()
         {
-            if (Constants.ConstantToTokenType.ContainsKey(tokenText))
-                type = Constants.ConstantToTokenType.GetValueOrDefault(tokenText);
+            return IsTypeOf(TokenType.HIGH_EXPRESSION, TokenType.LOW_EXPRESSION);
+        }
 
-            else if (TokenRules.IsValidFunction(tokenText))
-                type = TokenType.FUNCTION;
 
-            else if (TokenRules.IsValidKeyword(tokenText))
-                type = TokenType.VARIABLE;
-
-            else if (TokenRules.IsValidValue(tokenText))
-                type = TokenType.VALUE;
-
-            else if (TokenRules.IsValidHighExpression(tokenText))
-                type = TokenType.HIGH_EXPRESSION;
-
-            else if (TokenRules.IsValidLowExpression(tokenText))
-                type = TokenType.LOW_EXPRESSION;
+        private void SpecifyType()
+        {
+            if (Constants.ConstantToTokenType.TryGetValue(tokenText, out TokenType tt))
+                type = tt;
 
             else
-                type = TokenType.UNKNOWN;
+                type = TokenType.VARIABLE;
         }
+
     }
 }

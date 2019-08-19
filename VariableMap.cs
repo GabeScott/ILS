@@ -8,72 +8,67 @@ namespace ILS
     {
         private static Dictionary<string, Variable> AllVariables = new Dictionary<string, Variable>();
 
-        public static void AddNewVariable(string name, double value)
+        public static void AddNewVariable(string newVarName, double newVarValue)
         {
-            if (AllVariables.ContainsKey(name))
-                throw new InvalidVariableNameException("Variable " + name + " already exists");
+            if (AllVariables.ContainsKey(newVarName))
+                throw new ILSException("Variable " + newVarName + " already exists");
             else
-                AllVariables.Add(name, new NumberVariable(name, value));
-        }
-
-        public static void AddNewVariable(string name, string value)
-        {
-            if (AllVariables.ContainsKey(name))
-                throw new InvalidVariableNameException("Variable " + name + " already exists");
-            else
-                AllVariables.Add(name, new StringVariable(name, value));
+                AllVariables.Add(newVarName, new NumberVariable(newVarName, newVarValue));
         }
 
 
-        public static void UpdateVariable(string variableName, string variableVal)
+        public static void AddNewVariable(string newVarName, string newVarValue)
         {
-            TokenType varType = GetVariableType(variableName);
-
-            if(varType == TokenType.VARIABLESTR)
-                AllVariables[variableName] = new StringVariable(variableName, variableVal);
-
+            if (AllVariables.ContainsKey(newVarName))
+                throw new ILSException("Variable " + newVarName + " already exists");
             else
-            {
-                if (!TokenRules.IsValidNumberValue(variableVal))
-                    throw new InvalidNumberValueException("Invalid number to update variable to: " + variableVal);
-
-                double.TryParse(variableVal, out double result);
-                AllVariables[variableName] = new NumberVariable(variableName, result);
-
-            }
+                AllVariables.Add(newVarName, new StringVariable(newVarName, newVarValue));
         }
 
 
-        public static string GetVariableValue(string variableName)
+        public static void DeleteVariable(string varName)
         {
-            Variable v = GetVarByName(variableName);
+            if (!AllVariables.ContainsKey(varName))
+                throw new ILSException("Variable " + varName + " does not exist and cannot be deleted");
+            else
+                AllVariables.Remove(varName);
+        }
+
+
+        public static void UpdateVariable(string existingVariable, double newValue)
+        {
+            AllVariables[existingVariable] = new NumberVariable(existingVariable, newValue);
+        }
+
+
+        public static void UpdateVariable(string existingVariable, string newValue)
+        {
+            AllVariables[existingVariable] = new StringVariable(existingVariable, newValue);
+        }
+
+
+        public static string GetVariableValue(string varToRetrive)
+        {
+            Variable v = GetVarByName(varToRetrive);
 
             return v.GetValAsString();
         }
 
 
-        public static TokenType GetVariableType(string variableName)
+        public static TokenType GetVariableType(string varToRetrive)
         {
-            Variable v = GetVarByName(variableName);
+            Variable v = GetVarByName(varToRetrive);
 
             return v.GetType();
         }
 
 
-        private static Variable GetVarByName(string variableName)
+        private static Variable GetVarByName(string varToRetrive)
         {
-            CheckIfVariableExists(variableName);
+            if (!AllVariables.TryGetValue(varToRetrive, out Variable v))
+                throw new ILSException("Invalid variable name: " + varToRetrive);
 
-            return AllVariables.GetValueOrDefault(variableName);
-        }
-
-
-        private static void CheckIfVariableExists(string varName)
-        {
-            Variable v = AllVariables.GetValueOrDefault(varName);
-
-            if (v == null)
-                throw new InvalidVariableNameException("Variable does not exist: " + varName);
+            return v;
         }
     }
 }

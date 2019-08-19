@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace ILS
 {
@@ -9,18 +7,16 @@ namespace ILS
        
         static void Main(string[] args)
         {
-            string ILSFilename = "C:/Users/Gabe Scott/Desktop/ILS.ils";
+            string ILSFilename = "ILS.ils";
 
             File file = new File(ILSFilename);
-
             try
             {
-                file.LoadInputAndExecute();
+                file.LoadAllLinesAndExecute();
             }catch(ILSException e)
             {
                 Console.WriteLine(e.Message);
             }
-
 
             Console.ReadKey();
 

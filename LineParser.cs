@@ -1,133 +1,86 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
-using System.Text;
 
 namespace ILS
 {
-    class LineParser
+    public class LineParser
     {
-        private delegate bool TokenRule(string tokenToTest);
-
-        private string unparsedLine;
-        private char[] unparsedLineCharArray;
-
+        private string lineToParse;
         private List<Token> tokensFoundInLine;
 
-        private int beginTokenIndex = 0;
-        private int endTokenIndex = 0;
 
-        private bool inputHasBeenParsed = false;
-
-
-        public LineParser(string unparsedLine)
+        public LineParser(string lineToParse)
         {
-            this.unparsedLine = unparsedLine;
-
-            unparsedLineCharArray = unparsedLine.ToCharArray();
+            this.lineToParse = lineToParse;
             tokensFoundInLine = new List<Token>();
+            RunParse();
         }
+
+
+        private void RunParse()
+        {
+            StateTransitioner stateTransitioner = new StateTransitioner();
+
+            string currentToken = "";
+            TokenType currentTokenType;
+
+
+            foreach(char currChar in lineToParse)
+            {
+                currentTokenType = stateTransitioner.GetCurrentTokenType();
+
+                stateTransitioner.UpdateState(currChar);
+
+                if (stateTransitioner.IsMultiCharacterToken())
+                {
+                    tokensFoundInLine.Add(new Token(currentToken, currentTokenType));
+                    tokensFoundInLine.Add(new Token(currChar.ToString(), TokenType.SINGLE_CHAR));
+
+                    stateTransitioner.ResetState();
+                    currentToken = "";
+                }
+
+                else if (stateTransitioner.IsSingleCharacterToken())
+                {
+                    currentToken += currChar;
+                    tokensFoundInLine.Add(new Token(currentToken, currentTokenType));
+
+                    stateTransitioner.ResetState();
+                    currentToken = "";
+                }
+
+                else if (stateTransitioner.IsInvalidState())
+                    throw new ILSException("Invalid token: " + currentToken + currChar);
+
+                else
+                    currentToken += currChar;
+            }
+
+            if (currentToken.Length > 0)
+            {
+                currentTokenType = stateTransitioner.GetCurrentTokenType();
+                tokensFoundInLine.Add(new Token(currentToken, currentTokenType));
+            }
+            RemoveEmptyTokens();
+        }
+
+
+        private void RemoveEmptyTokens()
+        {
+            for (int i = 0; i < tokensFoundInLine.Count; i++)
+                if (tokensFoundInLine[i].ToString() == " ")
+                {
+                    tokensFoundInLine.RemoveAt(i);
+                    i--;
+                }
+        }
+
 
 
         public Token[] GetTokens()
         {
-            if (!inputHasBeenParsed)
-                Parse();
-
             return tokensFoundInLine.ToArray();
         }
 
-        private void Parse()
-        {
-            char currChar;
-
-            while (beginTokenIndex < unparsedLineCharArray.Length)
-            {
-                currChar = unparsedLineCharArray[endTokenIndex];
-
-                if (TokenRules.IsValidNumStart(currChar))
-                    SetIndexesBasedOnRule(TokenRules.IsValidNumberValue);
-
-                else if (TokenRules.IsValidKeywordStart(currChar))
-                    SetIndexesBasedOnRule(TokenRules.IsValidKeyword);
-
-                else if (TokenRules.IsValidStringLiteralStart(currChar))
-                {
-                    endTokenIndex++;
-                    SetIndexesBasedOnRule(TokenRules.IsNotStringLiteralIdentifier);
-                }
-
-                else if (TokenRules.IsValidHighExpression(currChar.ToString())
-                             || TokenRules.IsValidLowExpression(currChar.ToString()))
-                    endTokenIndex++;
-
-                else
-                    beginTokenIndex = ++endTokenIndex;
-
-                AddCurrentToken();
-                UpdateTokenIndexes();
-            }
-
-            inputHasBeenParsed = true;
-        }
-
-
-        private void SetIndexesBasedOnRule(TokenRule tokenRule)
-        {
-            
-            char currChar;
-            string currentWord = "";
-
-            do
-            {
-                currChar = unparsedLineCharArray[endTokenIndex];
-                currentWord += currChar;
-                endTokenIndex++;
-            }
-            while (tokenRule(currentWord) && endTokenIndex < unparsedLineCharArray.Length);
-
-            HandleLastCharacter(currChar);
-        }
-
-
-        private void HandleLastCharacter(char endingChar)
-        {
-            bool requiresLastCharacter = endTokenIndex == unparsedLineCharArray.Length || !TokenRules.IsValidCharAfterToken(endingChar);
-
-            if (!requiresLastCharacter)
-                endTokenIndex--;
-
-            if (endTokenIndex == unparsedLineCharArray.Length)
-                return;
-
-            char afterToken = unparsedLineCharArray[endTokenIndex];
-
-            if (!TokenRules.IsValidCharAfterToken(afterToken))
-                throw new InvalidTokenException("Invalid space after token: " + afterToken);
-
-        }
-
-
-        private void AddCurrentToken()
-        {
-            string tokenToAdd = GetTokenFromIndexes();
-
-            if(tokenToAdd != null)
-                tokensFoundInLine.Add(new Token(tokenToAdd));
-        }
-
-
-        private string GetTokenFromIndexes()
-        {
-            if (beginTokenIndex == endTokenIndex)
-                return null;
-
-            return unparsedLine.Substring(beginTokenIndex, endTokenIndex - beginTokenIndex);
-        }
-
-
-        private void UpdateTokenIndexes()
-        {
-            beginTokenIndex = endTokenIndex;
-        }
     }
 }

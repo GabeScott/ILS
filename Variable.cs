@@ -13,8 +13,6 @@ namespace ILS
             Name = name;
         }
 
-
-
         public abstract string GetValAsString();
 
     }
@@ -26,14 +24,14 @@ namespace ILS
         {
             this.val = val;
         }
+
         override public TokenType GetType() => TokenType.VARIABLENUM;
 
         public double GetVal() => val;
 
         override public string GetValAsString() => val.ToString();
-
-
     }
+
 
     class StringVariable : Variable
     {
@@ -42,11 +40,9 @@ namespace ILS
         {
             this.val = val;
         }
-        override public string GetValAsString() => val.ToString();
+        override public string GetValAsString() => val;
 
         override public TokenType GetType() => TokenType.VARIABLESTR;
-
-
 
     }
 }

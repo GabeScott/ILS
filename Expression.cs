@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace ILS
@@ -16,13 +17,13 @@ namespace ILS
 
         public Token Evaluate()
         {
+            if (tokensToEvaluate.Count % 2 != 1)
+                throw new ILSException("Invalid number of arguments");
+
             ReplaceVariableTokensWithValues();
 
             EvaluateBasedOnPrecedence(TokenType.HIGH_EXPRESSION);
             EvaluateBasedOnPrecedence(TokenType.LOW_EXPRESSION);
-
-            if (tokensToEvaluate.Count != 1)
-                throw new InvalidExpressionException("Invalid number of arguments");
 
             return tokensToEvaluate[0];
         }
@@ -38,7 +39,7 @@ namespace ILS
                     string variableValue = VariableMap.GetVariableValue(currentToken.ToString());
 
                     tokensToEvaluate.RemoveAt(i);
-                    tokensToEvaluate.Insert(i, new Token(variableValue));
+                    tokensToEvaluate.Insert(i, new Token(variableValue, TokenType.VALUE));
                 }
             }
         }
@@ -46,10 +47,11 @@ namespace ILS
 
         private void EvaluateBasedOnPrecedence(TokenType precedence)
         {
-            int operationIndex = 0;
+            int operationIndex;
 
-            while (operationIndex < tokensToEvaluate.Count && !tokensToEvaluate[operationIndex].IsTypeOf(precedence))
-                operationIndex++;
+            for(operationIndex = 0; operationIndex < tokensToEvaluate.Count; operationIndex++)
+                if (tokensToEvaluate[operationIndex].IsTypeOf(precedence))
+                    break;
 
             if (operationIndex == tokensToEvaluate.Count)
                 return;
@@ -73,32 +75,43 @@ namespace ILS
 
             bool firstIsDouble = double.TryParse(firstVal, out double firstresult);
             bool secondIsDouble = double.TryParse(secondVal, out double secondresult);
-           
+
             if (firstIsDouble && secondIsDouble)
                 switch (operation)
                 {
-                    case "/":
-                        retval += firstresult / secondresult;
-                        break;
-                    case "*":
-                        retval += firstresult * secondresult;
-                        break;
                     case "+":
                         retval += firstresult + secondresult;
                         break;
                     case "-":
                         retval += firstresult - secondresult;
                         break;
+                    case "*":
+                        retval += firstresult * secondresult;
+                        break;
+                    case "/":
+                        retval += firstresult / secondresult;
+                        break;
                 }
+
+            else if (operation.ToString() == "+")
+                retval += GetValidString(firstVal + secondVal);
+
             else
-            {
-                if (operation.ToString() != "+")
-                    throw new InvalidTokenException("Invalid string operation: " + operation.ToString());
+                throw new ILSException("Invalid string operation: " + operation.ToString());
 
-                retval += firstVal + secondVal;
-            }
+            return new Token(retval, TokenType.VALUE);
+        }
 
-            return new Token(retval);
+
+        private string GetValidString(string str)
+        {
+            string returnstring = "";
+
+            foreach (char c in str)
+                if (c != Constants.stringLiteralIdentifier)
+                    returnstring += c;
+
+            return returnstring;
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace ILS
 {
@@ -12,27 +10,33 @@ namespace ILS
         private LineParser parser;
         private LineInterpreter interpreter;
 
+
+
         public TokenLine(string line)
         {
             unparsedLine = line;
-            tokens = new List<Token>();
 
             parser = new LineParser(unparsedLine);
+            tokens = new List<Token>(parser.GetTokens());
         }
 
-        public void ParseLine()
-        {
-            if (tokens.Count == 0)
-                foreach (Token t in parser.GetTokens())
-                    tokens.Add(t);
-        }
-
-        public void Interpret()
+        public void ParseAndExecute()
         {
             if (tokens.Count > 0)
             {
                 interpreter = new LineInterpreter(tokens.ToArray());
                 interpreter.Interpret();
+            }
+        }
+
+
+
+        public void CheckForLineMarker(int line)
+        {
+            if (tokens.Count > 0 && tokens[0].IsTypeOf(TokenType.LINE_MARKER))
+            {
+                LineMarkers.AddLineMarker(tokens[0].ToString().Substring(1), line);
+                tokens.RemoveAt(0);
             }
         }
 
