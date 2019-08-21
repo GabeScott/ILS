@@ -1,8 +1,4 @@
-ILS.csproj
-bin/Debug/netcoreapp2.1/ILS.dll
-bin/Debug/netcoreapp2.1/ILS.pdb
-obj/Debug/netcoreapp2.1/ILS.csproj.CoreCompileInputs.cache
-obj/Debug/netcoreapp2.1/ILS.csproj.FileListAbsolute.txt
-obj/Debug/netcoreapp2.1/ILS.csprojAssemblyReference.cache
-obj/Debug/netcoreapp2.1/ILS.dll
-obj/Debug/netcoreapp2.1/ILS.pdb
+bin/
+obj/
+.vs/
+Current Features.txt

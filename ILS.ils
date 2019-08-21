@@ -1,11 +1,180 @@
+I/L/S!
+n is string '100'
+s is string '100'
+?n=s? PRINTN 'EQUAL'+n+s
+DELETE fakevar
+DELETE s
+PRINTN n
+DELETE fakevar
+SLM!
+////SMALLEST NUMBER DIVISBLE BY ALL NUMBERS 1-UPPERLIMIT/////
 ILS!
+isprime is number 1
+primeguess is number 1
+primetoguess is number 1
+upperlimit is number 20
+currentlimit is number 2
+prevanswer is number 1
+currentdiv is number currentlimit
+currentguess is number currentlimit
+savecurrent is number currentguess
+answer is number 0-1
 
-n is number 4+9*8 next
-UPDATE n n*7 next
-s is string COOL next
-PRINT s next
-PRINTN s next
-PRINTN n next
+@FULLRESET 
+UPDATE savecurrent 0
+
+@PARTIALRESET 
+UPDATE currentguess savecurrent+prevanswer  
+UPDATE savecurrent currentguess
+UPDATE currentdiv currentlimit
+?isprime=1? JUMPTO ISPRIME
+?answer<0? JUMPTO LOOP
+
+PRINTN 'answer for limit of '+currentlimit+' is '+answer
+?currentlimit=upperlimit? PRINTN 'answer is '+answer
+?currentlimit=upperlimit? JUMPTO END
+?currentlimit<upperlimit? UPDATE currentlimit currentlimit+1
+UPDATE prevanswer answer
+UPDATE answer 0-1
+UPDATE isprime 1
+JUMPTO FULLRESET
 
 
+@LOOP 
+?currentguess>0? UPDATE currentguess currentguess-currentdiv
+?currentguess>0? JUMPTO LOOP
+?currentguess<0? JUMPTO PARTIALRESET
+?currentguess=0? UPDATE answer savecurrent
+?currentguess=0? JUMPTO PARTIALRESET
+
+@ISPRIME 
+UPDATE primeguess 1
+
+@NEXTVALUE 
+UPDATE primetoguess currentlimit
+UPDATE primeguess primeguess+1
+?primeguess=primetoguess? UPDATE answer prevanswer*primetoguess
+?primeguess=primetoguess? UPDATE isprime 0
+?primeguess=primetoguess? JUMPTO PARTIALRESET
+
+@PRIMELOOP 
+UPDATE primetoguess primetoguess-primeguess
+?primetoguess>0? JUMPTO PRIMELOOP
+?primetoguess<0? JUMPTO NEXTVALUE
+?primetoguess=0? UPDATE isprime 0
+?primetoguess=0? JUMPTO FULLRESET
+
+@END 
+SLM!
+
+
+/////////SUM OF SQUARES - SQUARE OF SUM//////////////
+I/L/S!
+input is number 100
+inputsq is number 0
+sumofinput is number 0
+temp is number 0
+answer is number 0
+JUMPTO 110
+UPDATE sumofinput sumofinput*sumofinput
+UPDATE answer sumofinput-inputsq
+PRINTN 'answer is '+answer
+SLM!
+
+UPDATE sumofinput sumofinput+temp+1
+UPDATE temp temp+1
+UPDATE inputsq inputsq+temp*temp
+?temp<input? JUMPTO 110
+JUMPTO 105
+
+
+SLM!
+
+////////////////NTH PRIME NUMBER//////////////
+
+S/L/M!
+ILS!
+limit is number 10001
+count is number 2
+prime is number 1
+factor is number 1
+diff is number 1
+quotient is number prime/factor
+@NEXTPRIME UPDATE prime prime+2
+UPDATE factor 1
+@NEWFACTOR UPDATE factor factor+1
+UPDATE quotient prime/factor
+UPDATE diff 1
+@NEWDIFF ?quotient<diff*10? JUMPTO STARTSUB
+UPDATE diff diff*10
+JUMPTO NEWDIFF
+@SMALLERDIFF UPDATE diff diff/10
+?diff>quotient? JUMPTO SMALLERDIFF
+?diff<1? UPDATE diff 1
+JUMPTO STARTSUB
+@STARTSUB UPDATE quotient quotient-diff
+?quotient>diff? JUMPTO STARTSUB
+?quotient=diff? JUMPTO NEXTPRIME
+?diff>1? JUMPTO SMALLERDIFF 
+?quotient=0? JUMPTO NEXTPRIME
+?factor*factor<prime? JUMPTO NEWFACTOR
+?count=limit? PRINTN 'Prime #'+count+': '+prime
+?count=limit? SLM!
+PRINTN count+': '+prime
+UPDATE count count+1
+JUMPTO NEXTPRIME
+
+SLM!
+
+////////////////SUM OF ALL PRIME NUMBERS BELOW LIMIT//////////////
+
+I/L/S!
+limit is number 2000000
+total is number 5
+prime is number 3
+factor is number 1
+diff is number 1
+quotient is number prime/factor
+
+@NEXTPRIMEB UPDATE prime prime+2
+UPDATE factor 1
+
+@NEWFACTORB UPDATE factor factor+1
+UPDATE quotient prime/factor
+UPDATE diff 1
+
+@NEWDIFFB ?quotient<diff*10? JUMPTO STARTSUBB
+UPDATE diff diff*10
+JUMPTO NEWDIFFB
+
+@SMALLERDIFFB UPDATE diff diff/10
+?diff>quotient? JUMPTO SMALLERDIFFB
+?diff<1? UPDATE diff 1
+JUMPTO STARTSUBB
+
+@STARTSUBB UPDATE quotient quotient-diff
+?quotient>diff? JUMPTO STARTSUBB
+?quotient=diff? JUMPTO NEXTPRIMEB
+?diff>1? JUMPTO SMALLERDIFFB
+?quotient=0? JUMPTO NEXTPRIMEB
+?factor*factor<prime? JUMPTO NEWFACTORB
+?prime>limit? PRINTN 'Sum of all primes below '+limit+' is '+total
+?prime>limit? SLM!
+PRINTN 'Below '+prime+': '+total
+UPDATE total total+prime
+JUMPTO NEXTPRIMEB
+
+SLM!
+
+
+I/L/S!
+?1?
+?1+2#2+2? PRINTN 1+6*9/5
+SLM!
+
+
+I/L/S!
+@PRINTHELLO PRINTN 'hello'
+PRINTN 'world'
+JUMPONCE PRINTHELLO
 SLM!
